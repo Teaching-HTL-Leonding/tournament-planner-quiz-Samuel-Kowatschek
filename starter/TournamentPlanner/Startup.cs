@@ -20,8 +20,10 @@ namespace TournamentPlanner
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Note: This method is NOT COMPLETE.
-            // Todo: Complete the class according to the requirements
+            services.AddDbContext<TournamentPlannerDbContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"])); 
+            //services.AddCors(options => options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+            //services.AddControllers();
+            //services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "CoronaStatisticsAPI", Version = "v1" }); });
 
             services.AddControllers();
         }

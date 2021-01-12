@@ -14,6 +14,9 @@ namespace TournamentPlanner.Data
             : base(options)
         { }
 
+        public DbSet<Match> Matches { get; set; }
+        public DbSet<Player> Players { get; set; }
+
         // This class is NOT COMPLETE.
         // Todo: Complete the class according to the requirements
 
@@ -22,9 +25,11 @@ namespace TournamentPlanner.Data
         /// </summary>
         /// <param name="newPlayer">Player to add</param>
         /// <returns>Player after it has been added to the DB</returns>
-        public Task<Player> AddPlayer(Player newPlayer)
+        public async Task<Player> AddPlayer(Player newPlayer)
         {
-            throw new NotImplementedException();
+            Players.Add(newPlayer);
+            await SaveChangesAsync();
+            return newPlayer;
         }
 
         /// <summary>
@@ -34,9 +39,11 @@ namespace TournamentPlanner.Data
         /// <param name="player2Id">ID of player 2</param>
         /// <param name="round">Number of the round</param>
         /// <returns>Generated match after it has been added to the DB</returns>
-        public Task<Match> AddMatch(int player1Id, int player2Id, int round)
+        public async Task<Match> AddMatch(int player1Id, int player2Id, int round)
         {
-            throw new NotImplementedException();
+            var match = new Match { Player1ID = player1Id, Player2ID = player2Id, Round = round };
+            await SaveChangesAsync();
+            return match;
         }
 
         /// <summary>
@@ -45,9 +52,25 @@ namespace TournamentPlanner.Data
         /// <param name="matchId">ID of the match to update</param>
         /// <param name="player">Player who has won the match</param>
         /// <returns>Match after it has been updated in the DB</returns>
-        public Task<Match> SetWinner(int matchId, PlayerNumber player)
+        public async Task<Match> SetWinner(int matchId, PlayerNumber player)
         {
-            throw new NotImplementedException();
+            var match = await Matches.FirstAsync(m => m.ID == matchId);
+            switch (player)
+            {
+                case PlayerNumber.Player1:
+                    match.WinnerID = match.Player1ID;
+                    match.Winner = match.Player1;
+                    break;
+                case PlayerNumber.Player2:
+                    match.WinnerID = match.Player2ID;
+                    match.Winner = match.Player2;
+                    break;
+                default:
+                    break;
+            }
+            return match;
+
+
         }
 
         /// <summary>
@@ -84,6 +107,25 @@ namespace TournamentPlanner.Data
         public Task GenerateMatchesForNextRound()
         {
             throw new NotImplementedException();
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.Player1)
+                .WithMany()
+                .HasForeignKey(m => m.Player1ID)
+                .IsRequired();
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.Player2)
+                .WithMany()
+                .HasForeignKey(m => m.Player2ID)
+                .IsRequired();
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.Winner)
+                .WithMany()
+                .HasForeignKey(m => m.WinnerID)
+                .IsRequired();
         }
     }
 }
